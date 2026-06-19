@@ -7,6 +7,7 @@
 //Replace 'YOUR_NEWS_API_KEY' with your actual key from https://newsapi.org
 const API_KEY = 'a18b0295c8fc41ae883aca39eeafa4cb'; 
 const BASE_URL = 'https://newsapi.org/v2';
+const NEWS_API_PROXY = 'https://api.allorigins.win/raw?url=';
 
 // --- System State Storage Vectors ---
 let currentCategory = 'general';
@@ -63,8 +64,10 @@ async function getLiveNewsFeed() {
         endpointUrl = `${BASE_URL}/top-headlines?country=us&category=${currentCategory}&apiKey=${API_KEY}`;
     }
 
+    const requestUrl = buildRequestUrl(endpointUrl);
+
     try {
-        const response = await fetch(endpointUrl);
+        const response = await fetch(requestUrl);
         
         // Parse raw response data into usable JSON
         const data = await response.json();
@@ -84,6 +87,16 @@ async function getLiveNewsFeed() {
         console.error('Data Fetch Anomaly Log:', networkError);
         showErrorFeedbackState(networkError.message);
     }
+}
+
+function buildRequestUrl(endpointUrl) {
+    const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+
+    if (isLocalhost) {
+        return endpointUrl;
+    }
+
+    return `${NEWS_API_PROXY}${encodeURIComponent(endpointUrl)}`;
 }
 
 // --- Render View UI Card Mutations ---
@@ -153,7 +166,7 @@ function showErrorFeedbackState(errorMessage) {
     
     // Detect if default API key placeholder isn't changed yet
     if (API_KEY === 'YOUR_NEWS_API_KEY') {
-        errorMessage = 'Invalid Access Credentials. Please insert your valid individual NewsAPI key token into line 7 of script.js to start parsing feeds.';
+        errorMessage = 'Invalid Access Credentials. Please insert your valid individual NewsAPI key token into script3.js to start parsing feeds.';
     }
 
     statusContainer.innerHTML = `
